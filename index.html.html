@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>静脉输液操作闯关大挑战 | 高职护理实训</title>
+    <!-- 二维码生成库 -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+        body {
+            background: linear-gradient(145deg, #d0e6e2 0%, #a8d5cf 100%);
+            font-family: 'Segoe UI', 'Roboto', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 16px;
+        }
+        .game-wrapper {
+            max-width: 600px;
+            width: 100%;
+            background: #fef9ef;
+            border-radius: 64px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            padding: 20px 20px 25px;
+            transition: all 0.2s;
+        }
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #00635a;
+            padding: 10px 18px;
+            border-radius: 60px;
+            margin-bottom: 20px;
+            color: white;
+            font-weight: bold;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .level-badge {
+            background: #ffb347;
+            padding: 5px 15px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            color: #2c2c2c;
+        }
+        .score-area {
+            background: #004d40;
+            padding: 5px 14px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+        }
+        .timer-box {
+            background: #ff8a5c;
+            padding: 5px 12px;
+            border-radius: 40px;
+            font-family: monospace;
+            font-size: 1rem;
+        }
+        .title {
+            text-align: center;
+            font-weight: 800;
+            font-size: 1.6rem;
+            margin: 6px 0 0;
+            color: #00635a;
+            letter-spacing: -0.5px;
+        }
+        .sub {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #2c6e5c;
+            margin-bottom: 18px;
+        }
+        .level-card {
+            background: #ffffffdb;
+            backdrop-filter: blur(2px);
+            border-radius: 48px;
+            padding: 18px 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+        .task-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            border-left: 8px solid #00acc1;
+            padding-left: 12px;
+            margin-bottom: 14px;
+            color: #004d40;
+        }
+        .task-desc {
+            background: #e0f2f1;
+            padding: 8px 12px;
+            border-radius: 28px;
+            font-size: 0.8rem;
+            margin-bottom: 18px;
+            color: #00695c;
+        }
+        .options-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 18px 0;
+            max-height: 350px;
+            overflow-y: auto;
+            padding: 4px;
+        }
+        .option-item {
+            background: #ffffff;
+            border-radius: 40px;
+            padding: 8px 16px;
+            border: 1.8px solid #b2dfdb;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.1s;
+            cursor: pointer;
+            color: #004d40;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .option-item.selected {
+            background: #00897b;
+            border-color: #004d40;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,105,92,0.3);
+        }
+        .sequence-area {
+            background: #eceff1;
+            border-radius: 36px;
+            padding: 14px;
+            margin: 12px 0;
+        }
+        .user-order-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+            background: #cfd8dc40;
+            padding: 10px;
+            border-radius: 32px;
+            min-height: 65px;
+        }
+        .order-chip {
+            background: #00897b;
+            color: white;
+            border-radius: 32px;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .order-chip span {
+            font-weight: bold;
+            margin-right: 4px;
+        }
+        .remove-step {
+            background: #d32f2f;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+            margin-left: 6px;
+        }
+        .pending-steps {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .pending-btn {
+            background: #fff3e0;
+            border-radius: 40px;
+            padding: 6px 14px;
+            border: 1px solid #cfd8dc;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: 0.05s linear;
+        }
+        .pending-btn:active {
+            background: #ffe0b5;
+        }
+        .warning-msg {
+            background: #ffecb3;
+            padding: 8px 12px;
+            border-radius: 28px;
+            font-size: 0.75rem;
+            margin: 12px 0;
+            color: #bf360c;
+        }
+        .button-bar {
+            display: flex;
+            gap: 14px;
+            margin-top: 8px;
+        }
+        .btn {
+            flex: 1;
+            background: #00897b;
+            border: none;
+            padding: 12px 0;
+            border-radius: 50px;
+            font-weight: bold;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .btn-secondary {
+            background: #5c6bc0;
+        }
+        .btn-danger {
+            background: #d32f2f;
+        }
+        .btn:active {
+            transform: scale(0.97);
+        }
+        .feedback {
+            background: #1e2a2a;
+            color: #ffd966;
+            border-radius: 32px;
+            padding: 10px 14px;
+            margin-top: 15px;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+        .reward-badge {
+            background: linear-gradient(135deg, #ffd966, #ffb74d);
+            border-radius: 28px;
+            padding: 8px;
+            text-align: center;
+            font-weight: bold;
+            margin-top: 12px;
+        }
+        .qrcode-section {
+            margin-top: 20px;
+            text-align: center;
+            background: #f1f8e9;
+            border-radius: 40px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .qrcode-container {
+            background: white;
+            padding: 10px;
+            border-radius: 28px;
+            display: inline-block;
+        }
+        footer {
+            font-size: 0.65rem;
+            text-align: center;
+            margin-top: 15px;
+            color: #4e6e5e;
+        }
+        @media (max-width: 550px) {
+            .game-wrapper { padding: 15px; }
+            .option-item, .pending-btn { padding: 5px 12px; font-size: 0.75rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="game-wrapper" id="gameApp">
+    <div class="game-header">
+        <span>💉 静脉输液闯关</span>
+        <span class="level-badge" id="currentLevelLabel">第1关 / 基础关</span>
+        <span class="score-area" id="passCountDisplay">🏆 通关:0/5</span>
+        <span class="timer-box" id="timerDisplay">⏱️ 01:00</span>
+    </div>
+    <div class="title">⚕️ 输液操作大挑战 ⚕️</div>
+    <div class="sub">高职学生·技能实训闯关</div>
+
+    <div class="level-card" id="levelContent">
+        <!-- 动态渲染关卡内容 -->
+    </div>
+
+    <div class="button-bar">
+        <button class="btn btn-secondary" id="resetGameBtn">🔄 重置游戏</button>
+        <button class="btn" id="submitTaskBtn">✅ 提交闯关</button>
+    </div>
+    <div class="feedback" id="feedbackMsg">
+        ✨ 严格按标准流程操作，通关赢称号+加分 ✨
+    </div>
+    <div id="rewardArea"></div>
+    
+    <!-- 二维码区域 -->
+    <div class="qrcode-section">
+        <div style="font-size:0.8rem; font-weight:bold;">📲 扫码进入闯关游戏</div>
+        <div id="qrcode" class="qrcode-container"></div>
+        <div style="font-size:0.7rem;">分享给同学，一起实训大挑战</div>
+    </div>
+    <footer>🏅 连续3次失败需重学该环节 | 通关3关以上得“输液操作小能手” | 通关5关获实训加分</footer>
+</div>
+
+<script>
+    // ======================= 闯关数据 =======================
+    // 第1关用物清单（全选）
+    const level1Items = [
+        "治疗车","治疗盘","一次性输液器","无菌棉签","输液小垫枕","止血带","碘伏","输液贴","弯盘",
+        "生理盐水","输液瓶贴","输液敷贴","医嘱单","输液记录单","输液架","医疗垃圾桶","生活垃圾桶"
+    ];
+    
+    // 第2关标准顺序
+    const level2CorrectOrder = [
+        "检查用物质量",
+        "粘贴输液瓶贴",
+        "消毒配药",
+        "插瓶排气"
+    ];
+    
+    // 第3关穿刺顺序 (标准)
+    const level3CorrectOrder = [
+        "核对解释",
+        "取舒适体位",
+        "扎压脉带选择血管",
+        "松开压脉带第一次消毒消毒直径大于5cm",
+        "准备输液敷贴",
+        "扎压脉带二次消毒",
+        "操作中核对",
+        "嘱患者握拳15-30度角进针，见回血再沿血管走向进少许",
+        "三松"
+    ];
+    
+    // 第4关固定+整理顺序 (增加洗手记录)
+    const level4CorrectOrder = [
+        "固定针柄",
+        "固定针眼和剩下针梗",
+        "固定头皮针软管",
+        "调滴数",
+        "操作后核对",
+        "安置患者舒适体位",
+        "处理垃圾",
+        "洗手",
+        "记录"
+    ];
+    
+    // 第5关综合素养选项
+    const level5Options = [
+        "做好人文关怀",
+        "操作技术熟练",
+        "核对准确",
+        "无菌观念强",
+        "一次见回血",
+        "不跨越不污染"
+    ];
+    
+    // 全局状态
+    let currentLevel = 1;
+    let passedLevels = [false, false, false, false, false];
+    let levelFailCount = [0,0,0,0,0];
+    let obtainedTitle = false;
+    
+    // 各关卡当前数据
+    let selections = {
+        level1: new Set(),
+        level2: [],      // 用户排好的顺序
+        level3: [],
+        level4: [],
+        level5: new Set()
+    };
+    
+    // 存储打乱后的待选步骤 (用于第3、4关展示乱序)
+    let shuffledLevel3Options = [];
+    let shuffledLevel4Options = [];
+    
+    // 计时相关 (仅第1关)
+    let timerInterval = null;
+    let timeLeft = 60;
+    let isTiming = false;
+    
+    // DOM 元素
+    const levelContentDiv = document.getElementById("levelContent");
+    const feedbackDiv = document.getElementById("feedbackMsg");
+    const rewardAreaDiv = document.getElementById("rewardArea");
+    const timerSpan = document.getElementById("timerDisplay");
+    const currentLevelSpan = document.getElementById("currentLevelLabel");
+    const passCountSpan = document.getElementById("passCountDisplay");
+    
+    // 辅助: 打乱数组 (Fisher-Yates)
+    function shuffleArray(arr) {
+        let array = [...arr];
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+    
+    // 重置打乱顺序 (每次重新进入关卡时刷新乱序)
+    function refreshShuffledOptions() {
+        shuffledLevel3Options = shuffleArray(level3CorrectOrder);
+        shuffledLevel4Options = shuffleArray(level4CorrectOrder);
+    }
+    
+    // 计时停止
+    function stopTimer() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+        isTiming = false;
+    }
+    
+    function updateTimerDisplay() {
+        if (timerSpan) {
+            let minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+            timerSpan.innerText = `⏱️ ${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+        }
+    }
+    
+    function startLevel1Timer() {
+        stopTimer();
+        if (currentLevel !== 1) return;
+        timeLeft = 60;
+        updateTimerDisplay();
+        isTiming = true;
+        timerInterval = setInterval(() => {
+            if (currentLevel !== 1) {
+                stopTimer();
+                return;
+            }
+            if (timeLeft <= 1) {
+                if (timerInterval) clearInterval(timerInterval);
+                timerInterval = null;
+                isTiming = false;
+                handleLevel1Timeout();
+            } else {
+                timeLeft--;
+                updateTimerDisplay();
+            }
+        }, 1000);
+    }
+    
+    function handleLevel1Timeout() {
+        if (currentLevel !== 1) return;
+        const idx = 0;
+        levelFailCount[idx]++;
+        const failTimes = levelFailCount[idx];
+        feedbackDiv.innerHTML = `⏰ 用物准备超时！闯关失败！ (连续失败 ${failTimes} 次)`;
+        if (failTimes >= 3) {
+            feedbackDiv.innerHTML += ` 需要重新学习【操作前准备】环节，重置该关进度。`;
+            levelFailCount[idx] = 0;
+            selections.level1.clear();
+            renderCurrentLevel();
+            startLevel1Timer();
+        } else {
+            selections.level1.clear();
+            renderCurrentLevel();
+            startLevel1Timer();
+        }
+        updateHeaderInfo();
+    }
+    
+    // 通用顺序关卡渲染 (支持乱序待选区)
+    function renderOrderLevel(correctArray, userArray, levelNum, desc, shuffledPool) {
+        // 未选中的步骤池 (从打乱池中过滤掉已经添加的步骤)
+        const remainingFromShuffled = shuffledPool.filter(step => !userArray.includes(step));
+        const html = `
+            <div class="task-title">🔧 第${levelNum}关 · ${desc}</div>
+            <div class="task-desc">📌 请严格按照标准操作流程的顺序，依次点击下方【乱序步骤】添加到右侧，顺序必须完全正确。</div>
+            <div class="sequence-area">
+                <div style="font-weight:bold;">📋 当前已选顺序 (点击❌可移除末尾):</div>
+                <div class="user-order-container" id="userOrderContainer">
+                    ${userArray.length === 0 ? '<span style="color:gray;">暂无步骤，请从乱序区点击添加</span>' : 
+                        userArray.map((step, idx) => `
+                            <div class="order-chip">
+                                <span>${idx+1}</span> ${step}
+                                <span class="remove-step" data-removestep="${step}">✖</span>
+                            </div>
+                        `).join('')}
+                </div>
+                ${userArray.length > 0 ? `<button id="clearOrderBtn" style="background:#b0bec5; border:none; border-radius:30px; padding:5px 12px; margin-bottom:10px;">🔄 清空顺序重置</button>` : ''}
+                <div style="font-weight:bold; margin:12px 0 6px;">🎲 乱序待选步骤 (点击按顺序添加):</div>
+                <div class="pending-steps" id="pendingSteps">
+                    ${remainingFromShuffled.map(step => `<div class="pending-btn" data-pending="${step}">➕ ${step}</div>`).join('')}
+                    ${remainingFromShuffled.length === 0 ? '<div style="color:green;">✔️ 所有步骤已添加，请提交验证顺序正确性</div>' : ''}
+                </div>
+            </div>
+            <div class="warning-msg">⚠️ 顺序必须严格: ${correctArray.join(' → ')}。只有完全按标准顺序才可通关。</div>
+        `;
+        levelContentDiv.innerHTML = html;
+        
+        // 添加步骤事件
+        document.querySelectorAll(".pending-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const step = btn.getAttribute("data-pending");
+                if (step && !userArray.includes(step)) {
+                    // 检查添加后是否符合标准顺序前缀?
+                    userArray.push(step);
+                    renderOrderLevel(correctArray, userArray, levelNum, desc, shuffledPool);
+                } else if (step && userArray.includes(step)) {
+                    feedbackDiv.innerHTML = "⚠️ 该步骤已经添加过了，不能重复添加";
+                }
+            });
+        });
+        
+        // 移除末尾步骤
+        document.querySelectorAll(".remove-step").forEach(el => {
+            el.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const stepToRemove = el.getAttribute("data-removestep");
+                const idx = userArray.lastIndexOf(stepToRemove);
+                if (idx !== -1 && idx === userArray.length-1) {
+                    userArray.pop();
+                    renderOrderLevel(correctArray, userArray, levelNum, desc, shuffledPool);
+                } else {
+                    feedbackDiv.innerHTML = "❌ 只能从末尾逐步移除，不能删除中间步骤！请点击清空重置。";
+                }
+            });
+        });
+        
+        const clearBtn = document.getElementById("clearOrderBtn");
+        if (clearBtn) {
+            clearBtn.addEventListener("click", () => {
+                userArray.length = 0;
+                renderOrderLevel(correctArray, userArray, levelNum, desc, shuffledPool);
+            });
+        }
+    }
+    
+    // 第1关渲染
+    function renderLevel1() {
+        const selectedSet = selections.level1;
+        const html = `
+            <div class="task-title">📦 第1关 · 用物准备 (限时60秒)</div>
+            <div class="task-desc">✅ 请在1分钟内勾选全部17项必需用物，考核用物准备熟练度。</div>
+            <div class="options-grid" id="level1Grid">
+                ${level1Items.map(item => `
+                    <div class="option-item ${selectedSet.has(item) ? 'selected' : ''}" data-item="${item}">${item}</div>
+                `).join('')}
+            </div>
+            <div class="warning-msg">⚠️ 必须全部勾选: 治疗车、治疗盘、输液器、棉签、止血带、碘伏、输液贴、弯盘、生理盐水、输液瓶贴、输液敷贴、医嘱单、输液记录单、输液架、医疗/生活垃圾桶等17项。</div>
+        `;
+        levelContentDiv.innerHTML = html;
+        const grid = document.getElementById("level1Grid");
+        if (grid) {
+            grid.querySelectorAll(".option-item").forEach(el => {
+                el.addEventListener("click", () => {
+                    const item = el.getAttribute("data-item");
+                    if (selectedSet.has(item)) {
+                        selectedSet.delete(item);
+                        el.classList.remove("selected");
+                    } else {
+                        selectedSet.add(item);
+                        el.classList.add("selected");
+                    }
+                });
+            });
+        }
+    }
+    
+    // 第5关渲染
+    function renderLevel5() {
+        const selectedSet = selections.level5;
+        const html = `
+            <div class="task-title">🏅 第5关 · 综合素养（全选通关）</div>
+            <div class="task-desc">❤️ 人文关怀+无菌观念+操作熟练等6项品质必须全选，展现卓越素养。</div>
+            <div class="options-grid" id="level5Grid">
+                ${level5Options.map(opt => `
+                    <div class="option-item ${selectedSet.has(opt) ? 'selected' : ''}" data-opt="${opt}">✅ ${opt}</div>
+                `).join('')}
+            </div>
+            <div class="warning-msg">🌟 全部勾选后提交即可通关并获得实训加分+称号。</div>
+        `;
+        levelContentDiv.innerHTML = html;
+        const grid = document.getElementById("level5Grid");
+        if (grid) {
+            grid.querySelectorAll(".option-item").forEach(el => {
+                el.addEventListener("click", () => {
+                    const opt = el.getAttribute("data-opt");
+                    if (selectedSet.has(opt)) {
+                        selectedSet.delete(opt);
+                        el.classList.remove("selected");
+                    } else {
+                        selectedSet.add(opt);
+                        el.classList.add("selected");
+                    }
+                });
+            });
+        }
+    }
+    
+    // 刷新当前关卡展示
+    function renderCurrentLevel() {
+        if (currentLevel === 1) renderLevel1();
+        else if (currentLevel === 2) {
+            // 第2关也采用顺序但不需要打乱，直接固定列表（按设计可使用常规顺序）
+            // 为了统一体验，第2关也做成可点击顺序（非乱序但要求依次点正确）
+            const dummyShuffle = [...level2CorrectOrder];
+            renderOrderLevel(level2CorrectOrder, selections.level2, 2, "配药排气顺序", dummyShuffle);
+        }
+        else if (currentLevel === 3) {
+            if (shuffledLevel3Options.length === 0) refreshShuffledOptions();
+            renderOrderLevel(level3CorrectOrder, selections.level3, 3, "静脉穿刺核心顺序", shuffledLevel3Options);
+        }
+        else if (currentLevel === 4) {
+            if (shuffledLevel4Options.length === 0) refreshShuffledOptions();
+            renderOrderLevel(level4CorrectOrder, selections.level4, 4, "固定滴速+整理顺序", shuffledLevel4Options);
+        }
+        else if (currentLevel === 5) renderLevel5();
+        
+        if (currentLevel === 1) startLevel1Timer();
+        else stopTimer();
+    }
+    
+    // 验证当前关卡是否通过
+    function isCurrentValid() {
+        if (currentLevel === 1) {
+            const selected = selections.level1;
+            if (selected.size !== level1Items.length) return false;
+            for (let it of level1Items) if (!selected.has(it)) return false;
+            return true;
+        } else if (currentLevel === 2) {
+            return arraysEqual(selections.level2, level2CorrectOrder);
+        } else if (currentLevel === 3) {
+            return arraysEqual(selections.level3, level3CorrectOrder);
+        } else if (currentLevel === 4) {
+            return arraysEqual(selections.level4, level4CorrectOrder);
+        } else if (currentLevel === 5) {
+            const selected = selections.level5;
+            if (selected.size !== level5Options.length) return false;
+            for (let opt of level5Options) if (!selected.has(opt)) return false;
+            return true;
+        }
+        return false;
+    }
+    
+    function arraysEqual(a,b) {
+        if(!a || !b) return false;
+        if(a.length !== b.length) return false;
+        for(let i=0;i<a.length;i++) if(a[i] !== b[i]) return false;
+        return true;
+    }
+    
+    // 通关或失败逻辑
+    function submitTask() {
+        if (currentLevel === 1 && isTiming && timeLeft <= 0) {
+            handleLevel1Timeout();
+            return;
+        }
+        const valid = isCurrentValid();
+        const idx = currentLevel-1;
+        if (valid) {
+            if (!passedLevels[idx]) {
+                passedLevels[idx] = true;
+                levelFailCount[idx] = 0;
+                feedbackDiv.innerHTML = `🎉 第${currentLevel}关通关成功！进入下一关 🎉`;
+                if (currentLevel === 1) stopTimer();
+                if (currentLevel < 5) {
+                    currentLevel++;
+                    // 重置新关卡数据
+                    if (currentLevel === 2) selections.level2 = [];
+                    else if (currentLevel === 3) { selections.level3 = []; refreshShuffledOptions(); }
+                    else if (currentLevel === 4) { selections.level4 = []; refreshShuffledOptions(); }
+                    else if (currentLevel === 5) selections.level5.clear();
+                    renderCurrentLevel();
+                    updateHeaderInfo();
+                    updateRewards();
+                } else {
+                    // 第5关全通
+                    renderCurrentLevel();
+                    updateHeaderInfo();
+                    updateRewards();
+                    feedbackDiv.innerHTML = "🏆 恭喜完成全部5关！获得「输液操作小能手」称号 + 实训加分！🏆";
+                }
+            } else {
+                if (currentLevel < 5) {
+                    currentLevel++;
+                    if (currentLevel === 2) selections.level2 = [];
+                    else if (currentLevel === 3) { selections.level3 = []; refreshShuffledOptions(); }
+                    else if (currentLevel === 4) { selections.level4 = []; refreshShuffledOptions(); }
+                    else if (currentLevel === 5) selections.level5.clear();
+                    renderCurrentLevel();
+                    updateHeaderInfo();
+                }
+            }
+            updateRewards();
+        } else {
+            levelFailCount[idx]++;
+            const failTimes = levelFailCount[idx];
+            let failMsg = `❌ 操作错误，闯关失败！ (连续失败 ${failTimes} 次)`;
+            if (failTimes >= 3) {
+                failMsg += ` 需要重新学习【环节${currentLevel}】操作，重置该关进度，重新挑战。`;
+                levelFailCount[idx] = 0;
+                // 重置当前关卡选择
+                if (currentLevel === 1) selections.level1.clear();
+                else if (currentLevel === 2) selections.level2 = [];
+                else if (currentLevel === 3) { selections.level3 = []; refreshShuffledOptions(); }
+                else if (currentLevel === 4) { selections.level4 = []; refreshShuffledOptions(); }
+                else if (currentLevel === 5) selections.level5.clear();
+                renderCurrentLevel();
+                if (currentLevel === 1) startLevel1Timer();
+            } else {
+                feedbackDiv.innerHTML = failMsg + " 请检查步骤顺序或用物完整性。";
+            }
+            updateHeaderInfo();
+        }
+    }
+    
+    function updateRewards() {
+        const passedCount = passedLevels.filter(v=>v===true).length;
+        if (passedCount >= 3 && passedCount < 5 && !obtainedTitle) {
+            rewardAreaDiv.innerHTML = '<div class="reward-badge">✨ 获得「输液操作小能手」称号 ✨</div>';
+            obtainedTitle = true;
+        } else if (passedCount === 5) {
+            rewardAreaDiv.innerHTML = '<div class="reward-badge">🏅 称号：输液操作小能手 + 实训加分已解锁 🏅</div>';
+            obtainedTitle = true;
+        } else if (passedCount < 3) {
+            rewardAreaDiv.innerHTML = '';
+        }
+    }
+    
+    function updateHeaderInfo() {
+        const names = ["操作前准备", "配药排气", "静脉穿刺", "固定滴速", "操作后整理"];
+        currentLevelSpan.innerText = `第${currentLevel}关 / ${names[currentLevel-1]}`;
+        const pc = passedLevels.filter(v=>v===true).length;
+        passCountSpan.innerHTML = `🏆 通关:${pc}/5`;
+    }
+    
+    function fullReset() {
+        stopTimer();
+        currentLevel = 1;
+        passedLevels = [false, false, false, false, false];
+        levelFailCount = [0,0,0,0,0];
+        selections = {
+            level1: new Set(),
+            level2: [],
+            level3: [],
+            level4: [],
+            level5: new Set()
+        };
+        obtainedTitle = false;
+        rewardAreaDiv.innerHTML = '';
+        feedbackDiv.innerHTML = "🔄 游戏已重置，从第1关重新挑战！";
+        refreshShuffledOptions();
+        renderCurrentLevel();
+        updateHeaderInfo();
+        if (currentLevel === 1) startLevel1Timer();
+    }
+    
+    function generateQR() {
+        const url = window.location.href;
+        const qrDiv = document.getElementById("qrcode");
+        if (qrDiv) {
+            qrDiv.innerHTML = "";
+            new QRCode(qrDiv, {
+                text: url,
+                width: 120,
+                height: 120,
+                colorDark: "#00635a",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.M
+            });
+        }
+    }
+    
+    function init() {
+        refreshShuffledOptions();
+        fullReset();
+        generateQR();
+        document.getElementById("submitTaskBtn").addEventListener("click", submitTask);
+        document.getElementById("resetGameBtn").addEventListener("click", fullReset);
+    }
+    init();
+</script>
+</body>
+</html>
